@@ -1,6 +1,11 @@
 import { initializeApp } from "firebase/app";
-import { initializeAuth, getReactNativePersistence } from 'firebase/auth';
-import {getStorage} from 'firebase/storage';
+import { initializeAuth, getReactNativePersistence, updateProfile } from 'firebase/auth';
+import {
+  getStorage,
+  ref,
+  uploadBytesResumable,
+  getDownloadURL,
+} from "firebase/storage";
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -19,6 +24,43 @@ const auth = initializeAuth(app, {
   persistence: getReactNativePersistence(AsyncStorage)
 });
 
-const storage = getStorage(app);
+const uploadToFirebase = async (uri: string, name:string, onProgress:any) => {
+  const fetchResponse = await fetch(uri);
+  const theBlob = await fetchResponse.blob();
 
-export {app, auth, storage};
+  const user = auth.currentUser;
+
+  if (!user) {
+    throw new Error("No user logged in");
+  }
+
+  const imageRef = ref(getStorage(), `profilePics/${user.uid}/${name}`);
+  const uploadTask = uploadBytesResumable(imageRef, theBlob);
+
+  return new Promise((resolve, reject) => {
+    uploadTask.on(
+      "state_changed",
+      (snapshot) => {
+        const progress =
+          (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+        onProgress && onProgress(progress);
+      },
+      (error) => {
+        console.log(error);
+        reject(error);
+      },
+      async () => {
+        const downloadUrl = await getDownloadURL(uploadTask.snapshot.ref);
+        resolve({
+          downloadUrl,
+          metadata: uploadTask.snapshot.metadata,
+        });
+        updateProfile(user, {
+          photoURL: downloadUrl,
+        });
+      }
+    );
+  });
+};
+
+export {app, auth, uploadToFirebase};

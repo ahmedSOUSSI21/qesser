@@ -1,5 +1,5 @@
 {
-  "name": "uber-clone",
+  "name": "qesser",
   "version": "1.0.0",
   "main": "node_modules/expo/AppEntry.js",
   "scripts": {
@@ -23,7 +23,8 @@
     "install": "^0.13.0",
     "npm": "^10.2.5",
     "react": "18.2.0",
-    "react-native": "0.72.5"
+    "react-native": "0.72.5",
+    "expo-file-system": "~15.4.5"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",
