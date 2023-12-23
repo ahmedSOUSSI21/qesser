@@ -7,6 +7,9 @@ import {
   getDownloadURL,
 } from "firebase/storage";
 
+import {doc, getFirestore, setDoc} from 'firebase/firestore';
+
+
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const firebaseConfig = {
@@ -23,6 +26,8 @@ const app = initializeApp(firebaseConfig);
 const auth = initializeAuth(app, {
   persistence: getReactNativePersistence(AsyncStorage)
 });
+
+const db = getFirestore();
 
 const uploadToFirebase = async (uri: string, name:string, onProgress:any) => {
   const fetchResponse = await fetch(uri);
@@ -58,9 +63,14 @@ const uploadToFirebase = async (uri: string, name:string, onProgress:any) => {
         updateProfile(user, {
           photoURL: downloadUrl,
         });
+
+        await setDoc(doc(db, "users", user.uid), {
+          photoURL: downloadUrl,
+        }, {merge: true});
+
       }
     );
   });
 };
 
-export {app, auth, uploadToFirebase};
+export {app, auth, uploadToFirebase, db};

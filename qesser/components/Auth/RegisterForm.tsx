@@ -1,8 +1,9 @@
 import { StyleSheet, Text, TouchableOpacity, ActivityIndicator } from 'react-native'
-import { auth } from '../../core/firebaseConfig'
+import { auth, db } from '../../core/firebaseConfig'
 import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth'
 import React from 'react'
 import Input from './Input'
+import { doc, setDoc } from 'firebase/firestore'
 
 const isEmailValid = (email: string) => {
     const re = /\S+@\S+\.\S+/
@@ -48,7 +49,17 @@ const RegisterForm = () => {
             await updateProfile(auth.currentUser, {
                 displayName: displayName,
             });
-
+            
+            await setDoc(doc(db, "users", auth.currentUser.uid), {
+                displayName: displayName,
+                displayNameUpperCase: displayName.toUpperCase(),
+                email: email,
+                uid: auth.currentUser.uid,
+                photoURL: auth.currentUser.photoURL,
+                invitations: [],
+                friends: [],
+            })
+            
             setLoading(false)
         } catch (e: any) {
             setPasswordError(e)
