@@ -8,7 +8,7 @@ type FriendCardCardProps = {
 const FriendCard:React.FC<FriendCardCardProps> = ({user}) => {
   return (
     <TouchableOpacity style={[styles.container, styles.containerWithBorder]}>
-        <Image source={{uri: user.photoURL}} style={styles.image}/>
+        <Image source={ user.photoURL ? {uri: user.photoURL}: require("../../assets/default-profile-picture.png")} style={styles.image}/>
         <View style={styles.textContainer}>
             <Text style={styles.displayName}>{user.displayName}</Text>
         </View>
